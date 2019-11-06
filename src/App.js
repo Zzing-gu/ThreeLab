@@ -24,7 +24,7 @@ function App() {
       0.01,
       30000
     );
-    camera.position.z = 400;
+    camera.position.set(-10 , -10 , 10) 
     // y z axis exchange
     camera.up = new THREE.Vector3(0, 0, 1);
 
@@ -47,16 +47,17 @@ function App() {
 
 
     var slab = DrawSlabFix(100, 100, 10, 50 , 1 , 40 , 80)
+    //slab.rotation.set(Math.PI/2, 0 , 0)
 
     scene.add(slab)
 
     var ramen = DrawRamenFix(50,5, 5 ,30 ,0, 0, 1, 50)
 
-    //scene.add(ramen)
+    scene.add(ramen)
 
-    var rebar = RebarTest()
+    // var rebar = RebarTest()
 
-    scene.add(rebar)
+    // scene.add(rebar)
   }
 
   function animate() {

@@ -107,29 +107,53 @@ export function DrawRamenFix(
   var ramenPivot1 = new THREE.Mesh(pivotGeo, pivotMat);
   ramenPivot1.position.set(ramenWidth, 0, 0);
 
+  var mat = new THREE.MeshLambertMaterial({
+    color: 0xc0c0c0,
+    // wireframe: true
+    transparent: true,
+    opacity: 0.5
+  });
+
   //Ramen Beam
   var rbgeometry = new THREE.BoxGeometry(ramenWidth, ramenColumnXY, ramenBeamZ);
-  var rbmaterial = new THREE.MeshStandardMaterial({
-    color: 0xc0c0c0
-  });
-  var ramenBeam = new THREE.Mesh(rbgeometry, rbmaterial);
+
+  var ramenBeam = new THREE.Mesh(rbgeometry, mat);
   ramenBeam.position.set(ramenWidth / 2, ramenPosZ, ramenBeamZ / 2);
 
   //first Ramen Column
-  var geometry1 = new THREE.BoxGeometry(ramenColumnXY, ramenColumnXY, height);
-  var material1 = new THREE.MeshStandardMaterial({
-    color: 0xc0c0c0
-  });
-  var ramenCol1 = new THREE.Mesh(geometry1, material1);
-  ramenCol1.position.set(ramenColumnXY / 2, ramenPosZ, height / 2);
+  var geometry1 = new THREE.BoxGeometry(
+    ramenColumnXY,
+    ramenColumnXY,
+    height - ramenBeamZ
+  );
+
+  var ramenCol1 = new THREE.Mesh(geometry1, mat);
+  ramenCol1.position.set(
+    ramenColumnXY / 2,
+    ramenPosZ,
+    (height - ramenBeamZ) / 2
+  );
 
   //second Ramen Column
-  var geometry2 = new THREE.BoxGeometry(ramenColumnXY, ramenColumnXY, height);
-  var material2 = new THREE.MeshStandardMaterial({
-    color: 0xc0c0c0
-  });
-  var ramenCol2 = new THREE.Mesh(geometry2, material2);
-  ramenCol2.position.set(-ramenColumnXY / 2, ramenPosZ, height / 2);
+  var geometry2 = new THREE.BoxGeometry(
+    ramenColumnXY,
+    ramenColumnXY,
+    height - ramenBeamZ
+  );
+
+  var ramenCol2 = new THREE.Mesh(geometry2, mat);
+  ramenCol2.position.set(
+    -ramenColumnXY / 2,
+    ramenPosZ,
+    (height - ramenBeamZ) / 2
+  );
+
+  var col1Rebar = ramenColumnRebar(ramenColumnXY, height-ramenBeamZ,height, 3, 5, 0.1, 5, 1, 0);
+  ramenPivot.add(col1Rebar);
+
+
+  var col2Rebar = ramenColumnRebar(ramenColumnXY, height-ramenBeamZ,height, 3, 5, 0.1, 5, 1, 1);
+  ramenPivot1.add(col2Rebar);
 
   beamPivot.add(ramenBeam);
   pivotPoint.add(beamPivot);
@@ -147,31 +171,31 @@ export function DrawRamenFix(
   // 부분 만 커지게 .....
   //ramenBeam.scale.set(2, 1 ,1)
 
-  var result = {
-    floor: floor,
-    nodes: [
-      [
-        ramenPivotCenter + spanLength,
-        ramenColumnXY / 2,
-        adjustedFloor * floorHeight
-      ],
-      [
-        ramenPivotCenter + spanLength,
-        ramenColumnXY / 2,
-        height - ramenBeamZ / 2 + adjustedFloor * floorHeight
-      ],
-      [
-        ramenPivotCenter + spanLength,
-        ramenWidth - ramenColumnXY / 2,
-        height - ramenBeamZ / 2 + adjustedFloor * floorHeight
-      ],
-      [
-        ramenPivotCenter + spanLength,
-        ramenWidth - ramenColumnXY / 2,
-        adjustedFloor * floorHeight
-      ]
-    ]
-  };
+  // var result = {
+  //   floor: floor,
+  //   nodes: [
+  //     [
+  //       ramenPivotCenter + spanLength,
+  //       ramenColumnXY / 2,
+  //       adjustedFloor * floorHeight
+  //     ],
+  //     [
+  //       ramenPivotCenter + spanLength,
+  //       ramenColumnXY / 2,
+  //       height - ramenBeamZ / 2 + adjustedFloor * floorHeight
+  //     ],
+  //     [
+  //       ramenPivotCenter + spanLength,
+  //       ramenWidth - ramenColumnXY / 2,
+  //       height - ramenBeamZ / 2 + adjustedFloor * floorHeight
+  //     ],
+  //     [
+  //       ramenPivotCenter + spanLength,
+  //       ramenWidth - ramenColumnXY / 2,
+  //       adjustedFloor * floorHeight
+  //     ]
+  //   ]
+  // };
   // ramenNodeArr.push(result)
 
   // Section["1"] = {
@@ -255,7 +279,18 @@ export function DrawSlabFix(
   }
 
   //var rebarG = drawRebar(rc+lc+slabX , slabZ , slabZ/2 )
-  var rebarG = drawRebar(slabY, slabX+rc+lc, slabZ,  1, 10, 1, 10, 2, lc, rc);
+  var rebarG = drawRebar(
+    slabY,
+    slabX + rc + lc,
+    slabZ,
+    1,
+    10,
+    1,
+    10,
+    2,
+    lc,
+    rc
+  );
 
   pivotPoint.add(rebarG);
 
@@ -289,7 +324,7 @@ function drawRebar(
   slabY,
   width,
   height,
-  
+
   lngRad,
   lngSpan,
   latRad,
@@ -298,6 +333,8 @@ function drawRebar(
   lc,
   rc
 ) {
+
+  
   // 그냥 그룹의 위치를 바꿀까 ???
 
   var group = new THREE.Group();
@@ -312,42 +349,41 @@ function drawRebar(
     color: 0x777777,
     //wireframe: true,
     transparent: true,
-    opacity: 0.5,
+    opacity: 0.5
     //visible: false
   });
   var insideBox = new THREE.Mesh(insideBoxGeo, insideMat);
-  insideBox.position.set(width / 2-lc, slabY / 2, -height / 2);
+  insideBox.position.set(width / 2 - lc, slabY / 2, -height / 2);
   group.add(insideBox);
 
   var material = new THREE.LineBasicMaterial({
     color: 0xf2f2f2
   });
 
-
   var numOfLatRebar = width / latSpan;
   for (let index = 1; index < numOfLatRebar; index++) {
     var geometry = new THREE.Geometry();
     geometry.vertices.push(
       new THREE.Vector3(
-        coverThickness-lc,
+        coverThickness - lc,
         coverThickness,
-        -coverThickness - (latRad/2+lngRad/2)
+        -coverThickness - (latRad / 2 + lngRad / 2)
       ),
       new THREE.Vector3(
-        coverThickness-lc,
+        coverThickness - lc,
         slabY - coverThickness,
-        -coverThickness - (latRad/2+lngRad/2)
+        -coverThickness - (latRad / 2 + lngRad / 2)
       ),
 
       new THREE.Vector3(
-        coverThickness-lc,
+        coverThickness - lc,
         coverThickness,
-        -heightC - coverThickness + (latRad/2+lngRad/2)
+        -heightC - coverThickness + (latRad / 2 + lngRad / 2)
       ),
       new THREE.Vector3(
-        coverThickness-lc,
+        coverThickness - lc,
         slabY - coverThickness,
-        -heightC - coverThickness + (latRad/2+lngRad/2)
+        -heightC - coverThickness + (latRad / 2 + lngRad / 2)
       )
     );
     var line = new THREE.LineSegments(geometry, material);
@@ -359,15 +395,6 @@ function drawRebar(
 
   // coverthickness 로 줄어든 내부상자의 비주얼화 필요 ....
 
-  var roundedRectShape = new THREE.Shape();
-  // radius 는 height 의 반값 정도로 처리하자 ...
-  // coverThickness 는 width height 에서 2배해서 빼주고 위치 보정 작업 으로 ??
-  roundedRect(roundedRectShape, 0, -heightC, widthC, heightC, heightC/2);
-
-  roundedRectShape.autoClose = true;
-  var points = roundedRectShape.getPoints();
-
-  var geometryPoints = new THREE.BufferGeometry().setFromPoints(points);
   var mat = new THREE.LineBasicMaterial({ color: "#f2f2f2" });
 
   // solid line
@@ -375,38 +402,164 @@ function drawRebar(
   var numOfLngRebar = slabY / lngSpan;
   for (let index = 0; index <= numOfLngRebar; index++) {
     //var line = new THREE.Line(geometryPoints, mat);
-    var line = new THREE.Line(filletPolyline(makeStirrup(heightC, widthC, heightC, latRad),heightC/2,50), mat)
+    var line = new THREE.Line(
+      filletPolyline(
+        makeStirrup(heightC, widthC, heightC, latRad),
+        heightC / 2,
+        50
+      ),
+      mat
+    );
 
     line.position.set(
-      coverThickness-lc,
-      index * lngSpan ,
-      -coverThickness-heightC
+      coverThickness - lc,
+      index * lngSpan,
+      -coverThickness - heightC
     );
     if (index === 0) {
       line.position.set(
-        coverThickness-lc,
-        index * lngSpan + coverThickness+2,
-        -coverThickness-heightC
+        coverThickness - lc,
+        index * lngSpan + coverThickness + latRad,
+        -coverThickness - heightC
       );
     } else if (index === numOfLngRebar) {
       line.position.set(
-        coverThickness-lc,
+        coverThickness - lc,
         index * lngSpan - coverThickness,
-        -coverThickness-heightC
+        -coverThickness - heightC
       );
     }
     line.rotation.set(Math.PI / 2, 0, 0);
     line.scale.set(1, 1, 1);
     //group.add(line);
     group.add(line);
-
-
-    
-
   }
 
   //group.add(line);
   group.rotation.set(0, 0, -Math.PI / 2);
+
+  return group;
+}
+
+function ramenColumnRebar(
+  colXY,
+  colHeight,
+  height,
+  lngRad,
+  lngSpan,
+  latRad,
+  latSpan,
+  coverThickness,
+  pivotMode
+) {
+
+  var pivotX;
+  switch (pivotMode) {
+    case 0:
+      pivotX = colXY / 2
+      break;
+    case 1:
+      pivotX = -colXY / 2
+      break;
+
+    default:
+      break;
+  }
+
+
+  var group = new THREE.Group();
+
+  var groupC = new THREE.Group();
+
+  group.add(groupC);
+  groupC.position.set(pivotX, -colXY / 2, coverThickness);
+
+  var widthC = colXY - 2 * coverThickness;
+  var depthC = colXY - 2 * coverThickness;
+  var heightC = height - 2 * coverThickness;
+
+  var insideBoxGeo = new THREE.BoxGeometry(widthC, depthC, heightC);
+  var insideMat = new THREE.MeshBasicMaterial({
+    color: 0x777777,
+    //wireframe: true,
+    transparent: true,
+    opacity: 0.5
+    //visible: false
+  });
+  var insideBox = new THREE.Mesh(insideBoxGeo, insideMat);
+  //insideBox.position.set(width / 2 - lc, slabY / 2, -height / 2);
+  insideBox.position.set(0, 0, heightC / 2);
+
+  groupC.add(insideBox);
+
+  var mat = new THREE.LineBasicMaterial({ color: "#f2f2f2" });
+
+  var numOfLatRebar = heightC / latSpan;
+  console.log(numOfLatRebar)
+  for (let index = 0; index <= numOfLatRebar; index++) {
+    var line = new THREE.Line(
+      filletPolyline(
+        makeStirrup(widthC, widthC, latRad * 5, latRad),
+        latRad * 3,
+        50
+      ),
+      mat
+    );
+    line.position.set(-widthC / 2, -widthC / 2, index * latSpan);
+
+    if (index === Math.floor(numOfLatRebar)) {
+      console.log("it happened");
+    
+      line.position.set(-widthC / 2, -widthC / 2, colHeight-coverThickness);
+      groupC.add(line)
+    }
+
+    groupC.add(line);
+  }
+
+
+  for (let index = 0; index < 4; index++) {
+    
+    
+  }
+
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(
+    new THREE.Vector3(
+     -widthC/2 + latRad,-widthC/2,0
+    ),
+    new THREE.Vector3(
+      -widthC/2+ latRad,-widthC/2, heightC
+    ),
+
+    new THREE.Vector3(
+      widthC/2,widthC/2,0
+     ),
+     new THREE.Vector3(
+       widthC/2,widthC/2, heightC
+     ),
+
+     new THREE.Vector3(
+      -widthC/2,widthC/2,0
+     ),
+     new THREE.Vector3(
+      -widthC/2,widthC/2, heightC
+     ),
+
+     new THREE.Vector3(
+      widthC/2,-widthC/2,0
+     ),
+     new THREE.Vector3(
+       widthC/2,-widthC/2, heightC
+     ),
+  )
+
+  var line = new THREE.LineSegments(geometry, mat)
+      groupC.add(line)
+
+
+
+
 
   return group;
 }
@@ -423,50 +576,43 @@ function roundedRect(ctx, x, y, width, height, radius) {
   ctx.quadraticCurveTo(x, y, x, y + radius);
 }
 
+// export function RebarTest() {
+//   var extrudeSettings = {
+//     depth: 8,
+//     bevelEnabled: true,
+//     bevelSegments: 2,
+//     steps: 2,
+//     bevelSize: 1,
+//     bevelThickness: 1
+//   };
+//   var x = 0;
+//   var y = 0;
+//   var height = 150;
+//   var width = 250;
+//   var rebarDia = 16;
+//   var extend = 50
+//   //var stirrup = makeStirrup(height, width, extend, rebarDia)
+//   //var line = new THREE.Line(geometry,new THREE.LineBasicMaterial({ color: extrudeSettings }));
 
+//   var rebarResult = new THREE.Line(filletPolyline(makeStirrup(height, width, extend, rebarDia),20,50), new THREE.LineBasicMaterial({ color: '#f2f2f2' }))
 
-
-
-
-
-export function RebarTest() {
-  var extrudeSettings = {
-    depth: 8,
-    bevelEnabled: true,
-    bevelSegments: 2,
-    steps: 2,
-    bevelSize: 1,
-    bevelThickness: 1
-  };
-  var x = 0;
-  var y = 0;
-  var height = 150;
-  var width = 250;
-  var rebarDia = 16;
-  var extend = 50
-  //var stirrup = makeStirrup(height, width, extend, rebarDia)
-  //var line = new THREE.Line(geometry,new THREE.LineBasicMaterial({ color: extrudeSettings }));
- 
-
-  var rebarResult = new THREE.Line(filletPolyline(makeStirrup(height, width, extend, rebarDia),20,50), new THREE.LineBasicMaterial({ color: '#f2f2f2' }))
-
-  return rebarResult
-}
+//   return rebarResult
+// }
 
 function makeStirrup(height, width, extend, rebarDia) {
   var geometry = new THREE.Geometry();
-  geometry.vertices.push(new THREE.Vector3(extend,0,0))
-  geometry.vertices.push(new THREE.Vector3(0,0,0))
-  geometry.vertices.push(new THREE.Vector3(0,height,0))
-  geometry.vertices.push(new THREE.Vector3(width,height,0))
-  geometry.vertices.push(new THREE.Vector3(width,0,rebarDia))
-  geometry.vertices.push(new THREE.Vector3(0,0,rebarDia))
-  geometry.vertices.push(new THREE.Vector3(0,extend,rebarDia))
+  geometry.vertices.push(new THREE.Vector3(extend, 0, 0));
+  geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+  geometry.vertices.push(new THREE.Vector3(0, height, 0));
+  geometry.vertices.push(new THREE.Vector3(width, height, 0));
+  geometry.vertices.push(new THREE.Vector3(width, 0, rebarDia));
+  geometry.vertices.push(new THREE.Vector3(0, 0, rebarDia));
+  geometry.vertices.push(new THREE.Vector3(0, extend, rebarDia));
   return geometry;
 }
 
-function filletPolyline(geometry,radius,smoothness) {
-  var points = geometry.vertices
+function filletPolyline(geometry, radius, smoothness) {
+  var points = geometry.vertices;
   var newGeometry = new THREE.Geometry();
   var v1 = new THREE.Vector3();
   var v2 = new THREE.Vector3();
@@ -474,31 +620,42 @@ function filletPolyline(geometry,radius,smoothness) {
   var vc1 = new THREE.Vector3();
   var vc2 = new THREE.Vector3();
   var center = new THREE.Vector3();
-  var ang
-  var l1
+  var ang;
+  var l1;
 
-  newGeometry.vertices.push(points[0])
-  for (let i = 1; i < points.length -1; i++) {
+  newGeometry.vertices.push(points[0]);
+  for (let i = 1; i < points.length - 1; i++) {
     //console.log(points[i].x);
-    v1.subVectors(points[i-1],points[i]).normalize();
-    v2.subVectors(points[i+1],points[i]).normalize();
-    ang = Math.acos(v1.dot(v2))
-    l1 = radius/Math.sin(ang/2)
-    v3.addVectors(v1,v2).setLength(l1);
-    center.addVectors(points[i],v3);
-    var p1 = new THREE.Vector3().addVectors(points[i],v1.multiplyScalar(radius/Math.tan(ang/2)))
-    var p2 = new THREE.Vector3().addVectors(points[i],v2.multiplyScalar(radius/Math.tan(ang/2)))
-    vc1.subVectors(p1,center);
-    vc2.subVectors(p2,center);
-   
-    newGeometry.vertices.push(p1)
-    for (let j = 0; j < smoothness; j++)    {
-      var dirVec = new THREE.Vector3().addVectors(vc1.clone().multiplyScalar(smoothness-j),vc2.clone().multiplyScalar(j+1)).setLength(radius);
-      newGeometry.vertices.push(new THREE.Vector3().addVectors(center,dirVec));
+    v1.subVectors(points[i - 1], points[i]).normalize();
+    v2.subVectors(points[i + 1], points[i]).normalize();
+    ang = Math.acos(v1.dot(v2));
+    l1 = radius / Math.sin(ang / 2);
+    v3.addVectors(v1, v2).setLength(l1);
+    center.addVectors(points[i], v3);
+    var p1 = new THREE.Vector3().addVectors(
+      points[i],
+      v1.multiplyScalar(radius / Math.tan(ang / 2))
+    );
+    var p2 = new THREE.Vector3().addVectors(
+      points[i],
+      v2.multiplyScalar(radius / Math.tan(ang / 2))
+    );
+    vc1.subVectors(p1, center);
+    vc2.subVectors(p2, center);
+
+    newGeometry.vertices.push(p1);
+    for (let j = 0; j < smoothness; j++) {
+      var dirVec = new THREE.Vector3()
+        .addVectors(
+          vc1.clone().multiplyScalar(smoothness - j),
+          vc2.clone().multiplyScalar(j + 1)
+        )
+        .setLength(radius);
+      newGeometry.vertices.push(new THREE.Vector3().addVectors(center, dirVec));
     }
-    newGeometry.vertices.push(p2)
+    newGeometry.vertices.push(p2);
   }
-  newGeometry.vertices.push(points[points.length-1])
-  
+  newGeometry.vertices.push(points[points.length - 1]);
+
   return newGeometry;
 }
