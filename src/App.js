@@ -97,7 +97,7 @@ function App() {
     scene.add(line2);
 
 
-    var slab = DrawSlabFix(100, 100, 10, 30 , 1)
+    var slab = DrawSlabFix(100, 100, 10, 30 , 1 , 7 , 7)
 
     scene.add(slab)
 

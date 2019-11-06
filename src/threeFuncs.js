@@ -255,7 +255,7 @@ export function DrawSlabFix(
   }
 
   //var rebarG = drawRebar(rc+lc+slabX , slabZ , slabZ/2 )
-  var rebarG = drawRebar(slabY, slabX, slabZ, slabZ / 2, 1, 10, 2, 10, 3);
+  var rebarG = drawRebar(slabY, slabX+rc+lc, slabZ,  1, 10, 1, 10, 2, lc, rc);
 
   pivotPoint.add(rebarG);
 
@@ -283,71 +283,83 @@ export function DrawSlabFix(
   return pivotPoint;
 }
 
-// 길이가 긴 방향 lng ,    직선이 lng ,,, 짧은 방향이 감싼다. 
-// width , height 나 여러가지 인자등이 커버 틱니스의 영향을 받아야함 ... 
+// 길이가 긴 방향 lng ,    직선이 lng ,,, 짧은 방향이 감싼다.
+// width , height 나 여러가지 인자등이 커버 틱니스의 영향을 받아야함 ...
 function drawRebar(
   slabY,
   width,
   height,
-  radius,
+  
   lngRad,
   lngSpan,
   latRad,
   latSpan,
-  coverThickness
+  coverThickness,
+  lc,
+  rc
 ) {
-  var group = new THREE.Group()
+  var group = new THREE.Group();
 
+  var widthC = width - 2 * coverThickness;
+  var depthC = slabY - 2 * coverThickness;
+  var heightC = height - 2 * coverThickness;
 
-  var insideBoxGeo = new THREE.BoxGeometry(width-coverThickness, slabY-coverThickness,height-coverThickness)
-  var insideMat  = new THREE.MeshBasicMaterial({
+  var insideBoxGeo = new THREE.BoxGeometry(widthC, depthC, heightC);
+  var insideMat = new THREE.MeshBasicMaterial({
     color: 0x777777,
-    // wireframe: true,
+    //wireframe: true,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.5,
+    //visible: false
   });
-  var insideBox = new THREE.Mesh(insideBoxGeo, insideMat)
-  insideBox.position.set((width)/2, (slabY)/2,-(height)/2)
-  group.add(insideBox)
-
-
-
+  var insideBox = new THREE.Mesh(insideBoxGeo, insideMat);
+  insideBox.position.set(width / 2-lc, slabY / 2, -height / 2);
+  group.add(insideBox);
 
   var material = new THREE.LineBasicMaterial({
     color: 0xf2f2f2
   });
 
-  // var geometry = new THREE.Geometry();
-  // geometry.vertices.push(
-  //   new THREE.Vector3(0, 0, -5),
-  //   new THREE.Vector3(0, slabY, -5),
-
-  //   new THREE.Vector3(0, 0, -height),
-  //   new THREE.Vector3(0, slabY, -height)
-  // );
 
   var numOfLatRebar = width / latSpan;
-  for (let index = 1; index < numOfLatRebar; index++) {
+  for (let index = 1; index < numOfLatRebar-1; index++) {
     var geometry = new THREE.Geometry();
     geometry.vertices.push(
-      new THREE.Vector3(0, 0, -latRad),
-      new THREE.Vector3(0, slabY, -latRad),
+      new THREE.Vector3(
+        coverThickness,
+        coverThickness,
+        -coverThickness - latRad
+      ),
+      new THREE.Vector3(
+        coverThickness,
+        slabY - coverThickness,
+        -coverThickness - latRad
+      ),
 
-      new THREE.Vector3(0, 0, -height+latRad),
-      new THREE.Vector3(0, slabY, -height+latRad)
+      new THREE.Vector3(
+        coverThickness,
+        coverThickness,
+        -heightC - coverThickness + latRad
+      ),
+      new THREE.Vector3(
+        coverThickness,
+        slabY - coverThickness,
+        -heightC - coverThickness + latRad
+      )
     );
     var line = new THREE.LineSegments(geometry, material);
-    line.position.set(index*latSpan , 0 , 0)
-    
+    line.position.set(index * latSpan, 0, 0);
+
     group.add(line);
+    //insideBox.add(line);
   }
 
-  // coverthickness 로 줄어든 내부상자의 비주얼화 필요 .... 
+  // coverthickness 로 줄어든 내부상자의 비주얼화 필요 ....
 
   var roundedRectShape = new THREE.Shape();
   // radius 는 height 의 반값 정도로 처리하자 ...
   // coverThickness 는 width height 에서 2배해서 빼주고 위치 보정 작업 으로 ??
-  roundedRect(roundedRectShape, 0, -height, width, height, radius);
+  roundedRect(roundedRectShape, 0, -heightC, widthC, heightC, heightC/2);
 
   roundedRectShape.autoClose = true;
   var points = roundedRectShape.getPoints();
@@ -358,21 +370,30 @@ function drawRebar(
   // solid line
 
   var numOfLngRebar = slabY / lngSpan;
-  for (let index = 0; index < numOfLngRebar; index++) {
+  for (let index = 0; index <= numOfLngRebar; index++) {
     var line = new THREE.Line(geometryPoints, mat);
-    line.position.set(0, index * lngSpan, 0);
+    line.position.set(
+      coverThickness,
+      index * lngSpan + coverThickness,
+      -coverThickness
+    );
+    if (index === 0) {
+      line.position.set(
+        coverThickness,
+        index * lngSpan + coverThickness,
+        -coverThickness
+      );
+    } else if (index === numOfLngRebar) {
+      line.position.set(
+        coverThickness,
+        index * lngSpan - coverThickness,
+        -coverThickness
+      );
+    }
     line.rotation.set(Math.PI / 2, 0, 0);
     line.scale.set(1, 1, 1);
     group.add(line);
   }
-
-  // var line = new THREE.Line(
-  //   geometryPoints,
-  //   new THREE.LineBasicMaterial({ color: '#f2f2f2' })
-  // );
-  // line.position.set(0, 0, 0);
-  // line.rotation.set(Math.PI / 2, 0, 0);
-  // line.scale.set(1, 1, 1);
 
   group.add(line);
   group.rotation.set(0, 0, -Math.PI / 2);
