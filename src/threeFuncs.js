@@ -148,95 +148,28 @@ export function DrawRamenFix(
     (height - ramenBeamZ) / 2
   );
 
-  var col1Rebar = ramenColumnRebar(
-    ramenColumnXY,
-    height - ramenBeamZ,
-    height,
-    0.2,
-    5,
-    0.2,
-    3,
-    1,
-    0
-  );
-  ramenPivot.add(col1Rebar);
-
-  var col2Rebar = ramenColumnRebar(
-    ramenColumnXY,
-    height - ramenBeamZ,
-    height,
-    0.2,
-    5,
-    0.2,
-    3,
-    1,
-    1
-  );
-  ramenPivot1.add(col2Rebar);
-
-    var beamRebar = ramenBeamRebar(
-      ramenWidth,
-      ramenBeamZ,
-      0.2,
-      5,
-      0.2,
-      5,
-      1
-    );
-
-
-  beamPivot.add(beamRebar)
+ 
   beamPivot.add(ramenBeam);
-  pivotPoint.add(beamPivot);
+  
   ramenPivot.add(ramenCol1);
   //pivotPoint.add(ramenCol1);
   ramenPivot1.add(ramenCol2);
+
+  pivotPoint.add(beamPivot);
   pivotPoint.add(ramenPivot);
   pivotPoint.add(ramenPivot1);
-  //pivotPoint.add(tramenBeam)
-  //pivotPoint.rotation.set(0, 0, Math.PI / 2);
 
-  // 다커짐 ....
-  //pivotPoint.scale.set(2, 1 ,1)
 
-  // 부분 만 커지게 .....
-  //ramenBeam.scale.set(2, 1 ,1)
+  var ramenBeamObj = {
+    beamWidth: 150,
+    beamHeight: 15,
 
-  // var result = {
-  //   floor: floor,
-  //   nodes: [
-  //     [
-  //       ramenPivotCenter + spanLength,
-  //       ramenColumnXY / 2,
-  //       adjustedFloor * floorHeight
-  //     ],
-  //     [
-  //       ramenPivotCenter + spanLength,
-  //       ramenColumnXY / 2,
-  //       height - ramenBeamZ / 2 + adjustedFloor * floorHeight
-  //     ],
-  //     [
-  //       ramenPivotCenter + spanLength,
-  //       ramenWidth - ramenColumnXY / 2,
-  //       height - ramenBeamZ / 2 + adjustedFloor * floorHeight
-  //     ],
-  //     [
-  //       ramenPivotCenter + spanLength,
-  //       ramenWidth - ramenColumnXY / 2,
-  //       adjustedFloor * floorHeight
-  //     ]
-  //   ]
-  // };
-  // ramenNodeArr.push(result)
+    colXY:15,
+    colHeight:35,
+    height:50,
+  };
 
-  // Section["1"] = {
-  //   "name":"rahmen",
-  //   "width":ramenColumnXY,
-  //   "depth":ramenColumnXY,
-  //   "height":height
-  // }
-
-  return pivotPoint;
+  return {pivotPoint , ramenBeamObj} ;
 }
 
 export function DrawSlabFix(
@@ -274,18 +207,7 @@ export function DrawSlabFix(
 
   pivotPoint.add(slabMesh);
 
-  // var tubegeometry = new THREE.TorusGeometry(10, 0.3, 26, 32);
-  // var tubematerial = new THREE.MeshStandardMaterial({
-  //   color: 0x346644,
-  //   // wireframe: true
-  //   transparent: true,
-  //   opacity: 0.5
-  // });
-  // var tubeMesh = new THREE.Mesh(tubegeometry, tubematerial)
 
-  //pivotPoint.add(tubeMesh)
-
-  // lc, rc 가 존재할경우 추가해서 , pivot point 의 자식으로 넣어주자
 
   if (lc !== 0 && lc !== undefined) {
     var geometry = new THREE.BoxGeometry(slabX, lc, slabZ);
@@ -309,69 +231,42 @@ export function DrawSlabFix(
     pivotPoint.add(rcMesh);
   }
 
-  //var rebarG = drawRebar(rc+lc+slabX , slabZ , slabZ/2 )
-  var rebarG = drawRebar(
-    slabY,
-    slabX + rc + lc,
-    slabZ,
-    1,
-    10,
-    1,
-    10,
-    2,
-    lc,
-    rc
-  );
 
-  pivotPoint.add(rebarG);
 
   pivotPoint.rotation.set(0, 0, Math.PI / 2);
 
-  // var result = {
-  //   floor: floor,
-  //   nodes: [
-  //     [-lc, 0, floor * floorHeight - slabZ],
-  //     [slabY + rc, 0, floor * floorHeight - slabZ],
-  //     [slabY + rc, slabX, floor * floorHeight - slabZ],
-  //     [-lc, slabX, floor * floorHeight - slabZ]
-  //   ],
-  //   loads: load
-  // };
-  // slabNodeArr.push(result);
 
-  // Section["2"] = {
-  //   name: "slab",
-  //   width: slabY,
-  //   depth: slabX,
-  //   height: slabZ
-  // };
 
-  return pivotPoint;
+  var slabObj = {
+    width:slabX + rc + lc,
+    slabY:slabY,
+    height:slabZ,
+    lc:lc
+  }
+
+  return {pivotPoint , slabObj};
 }
 
 // 길이가 긴 방향 lng ,    직선이 lng ,,, 짧은 방향이 감싼다.
 // width , height 나 여러가지 인자등이 커버 틱니스의 영향을 받아야함 ...
-function drawRebar(
-  slabY,
-  width,
-  height,
-
+export function SlabRebar(
+  slabObj,
+ 
   lngRad,
   lngSpan,
   latRad,
   latSpan,
   coverThickness,
-  lc,
-  rc
+  
 ) {
   // 그냥 그룹의 위치를 바꿀까 ???
 
   var group = new THREE.Group();
-  //group.position.set(-lc+coverThickness, 0, 0)
+  //group.position.set(-slabObj.lc+coverThickness, 0, 0)
 
-  var widthC = width - 2 * coverThickness;
-  var depthC = slabY - 2 * coverThickness;
-  var heightC = height - 2 * coverThickness;
+  var widthC = slabObj.width - 2 * coverThickness;
+  var depthC = slabObj.slabY - 2 * coverThickness;
+  var heightC = slabObj.height - 2 * coverThickness;
 
   var insideBoxGeo = new THREE.BoxGeometry(widthC, depthC, heightC);
   var insideMat = new THREE.MeshBasicMaterial({
@@ -382,36 +277,36 @@ function drawRebar(
     //visible: false
   });
   var insideBox = new THREE.Mesh(insideBoxGeo, insideMat);
-  insideBox.position.set(width / 2 - lc, slabY / 2, -height / 2);
+  insideBox.position.set(slabObj.width / 2 - slabObj.lc, slabObj.slabY / 2, -slabObj.height / 2);
   group.add(insideBox);
 
   var material = new THREE.LineBasicMaterial({
     color: 0xf2f2f2
   });
 
-  var numOfLatRebar = width / latSpan;
+  var numOfLatRebar = slabObj.width / latSpan;
   for (let index = 1; index < numOfLatRebar; index++) {
     var geometry = new THREE.Geometry();
     geometry.vertices.push(
       new THREE.Vector3(
-        coverThickness - lc,
+        coverThickness - slabObj.lc,
         coverThickness,
         -coverThickness - (latRad / 2 + lngRad / 2)
       ),
       new THREE.Vector3(
-        coverThickness - lc,
-        slabY - coverThickness,
+        coverThickness - slabObj.lc,
+        slabObj.slabY - coverThickness,
         -coverThickness - (latRad / 2 + lngRad / 2)
       ),
 
       new THREE.Vector3(
-        coverThickness - lc,
+        coverThickness - slabObj.lc,
         coverThickness,
         -heightC - coverThickness + (latRad / 2 + lngRad / 2)
       ),
       new THREE.Vector3(
-        coverThickness - lc,
-        slabY - coverThickness,
+        coverThickness - slabObj.lc,
+        slabObj.slabY - coverThickness,
         -heightC - coverThickness + (latRad / 2 + lngRad / 2)
       )
     );
@@ -428,7 +323,7 @@ function drawRebar(
 
   // solid line
 
-  var numOfLngRebar = slabY / lngSpan;
+  var numOfLngRebar = slabObj.slabY / lngSpan;
   for (let index = 0; index <= numOfLngRebar; index++) {
     //var line = new THREE.Line(geometryPoints, mat);
     var line = new THREE.Line(
@@ -441,19 +336,19 @@ function drawRebar(
     );
 
     line.position.set(
-      coverThickness - lc,
+      coverThickness - slabObj.lc,
       index * lngSpan,
       -coverThickness - heightC
     );
     if (index === 0) {
       line.position.set(
-        coverThickness - lc,
+        coverThickness - slabObj.lc,
         index * lngSpan + coverThickness + latRad,
         -coverThickness - heightC
       );
     } else if (index === numOfLngRebar) {
       line.position.set(
-        coverThickness - lc,
+        coverThickness - slabObj.lc,
         index * lngSpan - coverThickness,
         -coverThickness - heightC
       );
@@ -470,26 +365,28 @@ function drawRebar(
   return group;
 }
 
-function ramenBeamRebar(
-  beamWidth,
-  beamHeight,
+
+
+
+
+export function ramenBeamRebar(
+  ramenObj,
   lngRad,
-  lngSpan,
+  lngNum,
   latRad,
   latSpan,
-  coverThickness,
-){
+  coverThickness
+) {
   var group = new THREE.Group();
 
   var groupC = new THREE.Group();
 
-  var widthC = beamWidth - 2 * coverThickness;
-  var depthC = beamHeight - 2 * coverThickness;
-  var heightC = beamHeight - 2 * coverThickness;
+  var widthC = ramenObj.beamWidth - 2 * coverThickness;
+  var depthC = ramenObj.beamHeight - 2 * coverThickness;
+  var heightC = ramenObj.beamHeight - 2 * coverThickness;
 
   group.add(groupC);
-  groupC.position.set(coverThickness, -beamHeight/2, beamHeight/2);
-
+  groupC.position.set(coverThickness, -ramenObj.beamHeight / 2, ramenObj.beamHeight / 2);
 
   var insideBoxGeo = new THREE.BoxGeometry(widthC, depthC, heightC);
   var insideMat = new THREE.MeshBasicMaterial({
@@ -500,8 +397,8 @@ function ramenBeamRebar(
     //visible: false
   });
   var insideBox = new THREE.Mesh(insideBoxGeo, insideMat);
-  //insideBox.position.set(width / 2 - lc, slabY / 2, -height / 2);
-  insideBox.position.set(widthC/2, 0,0);
+  //insideBox.position.set(width / 2 - lc, slabObj.slabY / 2, -height / 2);
+  insideBox.position.set(widthC / 2, 0, 0);
 
   groupC.add(insideBox);
 
@@ -518,8 +415,8 @@ function ramenBeamRebar(
       ),
       mat
     );
-    line.position.set(index*latSpan,-depthC/2,depthC/2);
-    line.rotation.set(0, Math.PI/2 , 0)
+    line.position.set(index * latSpan, -depthC / 2, depthC / 2);
+    line.rotation.set(0, Math.PI / 2, 0);
     groupC.add(line);
 
     if (index === Math.floor(numOfLatRebar)) {
@@ -533,83 +430,64 @@ function ramenBeamRebar(
       );
       console.log("it happened");
 
-      line.position.set(widthC-latRad,-depthC/2,depthC/2);
-      line.rotation.set(0, Math.PI/2 , 0)
+      line.position.set(widthC - latRad, -depthC / 2, depthC / 2);
+      line.rotation.set(0, Math.PI / 2, 0);
       groupC.add(line);
     }
-
   }
 
+  // 유저 입력 변수에서 -1
+  var numOfLngRebar = lngNum-1;
 
-
-  // 유저 입력 변수에서 -1 
-  var numOfLngRebar = 4
-  // var points = [[widthC / 2, widthC / 2], [widthC / 2, -widthC / 2]];
-
-  // 정사각형이라 가능 widthC/2 
-  //var spanLength = (points[0][0] + points[1][0]) /numOfLngRebar
-  
-  console.log(`spanlength : ${spanLength}`)
-  
-  
-  var widthCRad = widthC-latRad*3
-  var heightCRad = heightC-latRad*3
-  var depthCRad = depthC-latRad*3
-  console.log(`depthCRad : ${depthCRad}`)
-  var spanLength = depthCRad /numOfLngRebar
+  var depthCRad = depthC - latRad -lngRad;
+  console.log(`depthCRad : ${depthCRad}`);
+  var spanLength = depthCRad / numOfLngRebar;
+  console.log(`spanlength : ${spanLength}`);
 
   var geometry = new THREE.Geometry();
 
   for (let index = 0; index <= numOfLngRebar; index++) {
     geometry.vertices.push(
+      new THREE.Vector3(0, depthCRad / 2 - index * spanLength, depthCRad / 2),
       new THREE.Vector3(
-        0  , depthCRad/2 -index*spanLength  , depthCRad/2
-      ),
-      new THREE.Vector3(
-        widthC, depthCRad/2 -index*spanLength ,depthCRad/2
-      ),
-
-      new THREE.Vector3(
-        0  , -depthCRad/2 + index*spanLength , -depthCRad/2
-      ),
-      new THREE.Vector3(
-        widthC, -depthCRad/2+ index*spanLength,-depthCRad/2
+        widthC,
+        depthCRad / 2 - index * spanLength,
+        depthCRad / 2
       ),
 
+      new THREE.Vector3(0, -depthCRad / 2 + index * spanLength, -depthCRad / 2),
       new THREE.Vector3(
-        0  , -depthCRad/2  , depthCRad/2-index*spanLength
-      ),
-      new THREE.Vector3(
-        widthC, -depthCRad/2 ,depthCRad/2-index*spanLength
+        widthC,
+        -depthCRad / 2 + index * spanLength,
+        -depthCRad / 2
       ),
 
+      new THREE.Vector3(0, -depthCRad / 2, depthCRad / 2 - index * spanLength),
       new THREE.Vector3(
-        0  , depthCRad/2  , -depthCRad/2+index*spanLength
+        widthC,
+        -depthCRad / 2,
+        depthCRad / 2 - index * spanLength
       ),
+
+      new THREE.Vector3(0, depthCRad / 2, -depthCRad / 2 + index * spanLength),
       new THREE.Vector3(
-        widthC, depthCRad/2 ,-depthCRad/2+index*spanLength
-      ),
-    )
-    
+        widthC,
+        depthCRad / 2,
+        -depthCRad / 2 + index * spanLength
+      )
+    );
   }
 
-
-
-
-
   var line = new THREE.LineSegments(geometry, mat);
-  //line.rotation.set(0, Math.PI/2 , 0)
   groupC.add(line);
 
   return group;
 }
 
-function ramenColumnRebar(
-  colXY,
-  colHeight,
-  height,
+export function ramenColumnRebar(
+  ramenObj,
   lngRad,
-  lngSpan,
+  lngNum,
   latRad,
   latSpan,
   coverThickness,
@@ -618,10 +496,10 @@ function ramenColumnRebar(
   var pivotX;
   switch (pivotMode) {
     case 0:
-      pivotX = colXY / 2;
+      pivotX = ramenObj.colXY / 2;
       break;
     case 1:
-      pivotX = -colXY / 2;
+      pivotX = -ramenObj.colXY / 2;
       break;
 
     default:
@@ -633,11 +511,11 @@ function ramenColumnRebar(
   var groupC = new THREE.Group();
 
   group.add(groupC);
-  groupC.position.set(pivotX, -colXY / 2, coverThickness);
+  groupC.position.set(pivotX, -ramenObj.colXY / 2, coverThickness);
 
-  var widthC = colXY - 2 * coverThickness;
-  var depthC = colXY - 2 * coverThickness;
-  var heightC = height - 2 * coverThickness;
+  var widthC = ramenObj.colXY - 2 * coverThickness;
+  var depthC = ramenObj.colXY - 2 * coverThickness;
+  var heightC = ramenObj.height - 2 * coverThickness;
 
   var insideBoxGeo = new THREE.BoxGeometry(widthC, depthC, heightC);
   var insideMat = new THREE.MeshBasicMaterial({
@@ -671,119 +549,59 @@ function ramenColumnRebar(
     if (index === Math.floor(numOfLatRebar)) {
       console.log("it happened");
 
-      line.position.set(-widthC / 2, -widthC / 2, colHeight - coverThickness);
+      line.position.set(-widthC / 2, -widthC / 2, ramenObj.colHeight - coverThickness);
       groupC.add(line);
     }
 
     groupC.add(line);
   }
 
-  
-
- 
-  // 유저 입력 변수에서 -1 
-  var numOfLngRebar = 4
+  // 유저 입력 변수에서 -1
+  var numOfLngRebar = lngNum-1;
   // var points = [[widthC / 2, widthC / 2], [widthC / 2, -widthC / 2]];
 
-  // 정사각형이라 가능 widthC/2 
+  // 정사각형이라 가능 widthC/2
   //var spanLength = (points[0][0] + points[1][0]) /numOfLngRebar
-  
-  console.log(`spanlength : ${spanLength}`)
-  
-  
-  var widthCRad = widthC-latRad*3
-  var spanLength = widthCRad /numOfLngRebar
+
+  console.log(`spanlength : ${spanLength}`);
+
+  var widthCRad = widthC - latRad -lngRad;
+  var spanLength = widthCRad / numOfLngRebar;
 
   var geometry = new THREE.Geometry();
 
   for (let index = 0; index <= numOfLngRebar; index++) {
     geometry.vertices.push(
+      new THREE.Vector3(widthCRad / 2 - index * spanLength, widthCRad / 2, 0),
       new THREE.Vector3(
-        (widthCRad/2 - index*spanLength)  , widthCRad/2  , 0
+        widthCRad / 2 - index * spanLength,
+        widthCRad / 2,
+        heightC
       ),
+      new THREE.Vector3(widthCRad / 2 - index * spanLength, -widthCRad / 2, 0),
       new THREE.Vector3(
-        (widthCRad/2 - index*spanLength), widthCRad/2 , heightC
-      ),
-      new THREE.Vector3(
-        (widthCRad/2 - index*spanLength) , -widthCRad/2 , 0
-      ),
-      new THREE.Vector3(
-        (widthCRad/2 - index*spanLength), -widthCRad/2 , heightC
-      ),
-
-      new THREE.Vector3(
-        widthCRad/2  , widthCRad/2 -index*spanLength  , 0
-      ),
-      new THREE.Vector3(
-        widthCRad/2 , widthCRad/2 -index*spanLength, heightC
+        widthCRad / 2 - index * spanLength,
+        -widthCRad / 2,
+        heightC
       ),
 
+      new THREE.Vector3(widthCRad / 2, widthCRad / 2 - index * spanLength, 0),
       new THREE.Vector3(
-        -widthCRad/2  , widthCRad/2 -index*spanLength  , 0
+        widthCRad / 2,
+        widthCRad / 2 - index * spanLength,
+        heightC
       ),
+
+      new THREE.Vector3(-widthCRad / 2, widthCRad / 2 - index * spanLength, 0),
       new THREE.Vector3(
-        -widthCRad/2 , widthCRad/2 -index*spanLength, heightC
-      ),
-    )
-    
+        -widthCRad / 2,
+        widthCRad / 2 - index * spanLength,
+        heightC
+      )
+    );
   }
 
-  // for (let index = 0; index <= numOfLngRebar; index++) {
-  //   geometry.vertices.push(
-  //     new THREE.Vector3(
-  //       (widthC/2 - index*spanLength)  - adjustmentRad, widthC/2 -adjustmentRad , 0
-  //     ),
-  //     new THREE.Vector3(
-  //       (widthC/2 - index*spanLength)- adjustmentRad, widthC/2- adjustmentRad , heightC
-  //     ),
-  //     new THREE.Vector3(
-  //       (widthC/2 - index*spanLength)+ adjustmentRad , -widthC/2+ adjustmentRad , 0
-  //     ),
-  //     new THREE.Vector3(
-  //       (widthC/2 - index*spanLength)+ adjustmentRad, -widthC/2+ adjustmentRad , heightC
-  //     ),
-
-  //     new THREE.Vector3(
-  //       widthC/2- adjustmentRad  , widthC/2 -index*spanLength- adjustmentRad  , 0
-  //     ),
-  //     new THREE.Vector3(
-  //       widthC/2 - adjustmentRad, widthC/2 -index*spanLength- adjustmentRad, heightC
-  //     ),
-
-  //     new THREE.Vector3(
-  //       -widthC/2+ adjustmentRad  , widthC/2 -index*spanLength+ adjustmentRad  , 0
-  //     ),
-  //     new THREE.Vector3(
-  //       -widthC/2 + adjustmentRad, widthC/2 -index*spanLength+ adjustmentRad, heightC
-  //     ),
-  //   )
-    
-  // }
-
-
-
-
-  // geometry.vertices.push(
-  //   new THREE.Vector3(
-  //     -widthC / 2 + adjustmentRad,
-  //     -widthC / 2 + adjustmentRad,
-  //     0
-  //   ),
-  //   new THREE.Vector3(
-  //     -widthC / 2 + adjustmentRad,
-  //     -widthC / 2 + adjustmentRad,
-  //     heightC
-  //   ),
-
-  //   new THREE.Vector3(widthC / 2, widthC / 2, 0),
-  //   new THREE.Vector3(widthC / 2, widthC / 2, heightC),
-
-  //   new THREE.Vector3(-widthC / 2, widthC / 2, 0),
-  //   new THREE.Vector3(-widthC / 2, widthC / 2, heightC),
-
-  //   new THREE.Vector3(widthC / 2, -widthC / 2, 0),
-  //   new THREE.Vector3(widthC / 2, -widthC / 2, heightC)
-  // );
+  
 
   var line = new THREE.LineSegments(geometry, mat);
   groupC.add(line);
@@ -803,28 +621,7 @@ function roundedRect(ctx, x, y, width, height, radius) {
   ctx.quadraticCurveTo(x, y, x, y + radius);
 }
 
-// export function RebarTest() {
-//   var extrudeSettings = {
-//     depth: 8,
-//     bevelEnabled: true,
-//     bevelSegments: 2,
-//     steps: 2,
-//     bevelSize: 1,
-//     bevelThickness: 1
-//   };
-//   var x = 0;
-//   var y = 0;
-//   var height = 150;
-//   var width = 250;
-//   var rebarDia = 16;
-//   var extend = 50
-//   //var stirrup = makeStirrup(height, width, extend, rebarDia)
-//   //var line = new THREE.Line(geometry,new THREE.LineBasicMaterial({ color: extrudeSettings }));
 
-//   var rebarResult = new THREE.Line(filletPolyline(makeStirrup(height, width, extend, rebarDia),20,50), new THREE.LineBasicMaterial({ color: '#f2f2f2' }))
-
-//   return rebarResult
-// }
 
 function makeStirrup(height, width, extend, rebarDia) {
   var geometry = new THREE.Geometry();
